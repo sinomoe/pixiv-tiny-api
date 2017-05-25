@@ -33,7 +33,7 @@ class PixivTinyApi {
 
     // 通过用名密码登陆，或通过 refreshToken 刷新令牌
     auth(username, password, refreshToken) {
-        let data = {
+        const authData = {
             'get_secure_url': 1,
             'client_id': 'bYGKuGVw91e0NMfPGp44euvGt59s',
             'client_secret': 'HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK'
@@ -49,23 +49,25 @@ class PixivTinyApi {
             if (typeof refreshToken !== 'string')
                 Promise.reject(new TypeError('wrong refreshToken'));
 
-            data.grant_type = 'refresh_token';
-            data.refresh_token = refreshToken;
+            authData.grant_type = 'refresh_token';
+            authData.refresh_token = refreshToken;
 
-            return agent.send(data).then(res => {
-                this.accessToken = res.body.response.access_token;
-                this.refreshToken = res.body.response.refresh_token;
-            });
+            return agent
+                .send(authData)
+                .then(res => {
+                    this.accessToken = res.body.response.access_token;
+                    this.refreshToken = res.body.response.refresh_token;
+                });
         } else if (!refreshToken && username && password) {
             // 登陆
             if (!(typeof username === 'string' && typeof password === 'string'))
                 Promise.reject(new TypeError('wrong username or password'));
 
-            data.grant_type = 'password';
-            data.username = username;
-            data.password = password;
+            authData.grant_type = 'password';
+            authData.username = username;
+            authData.password = password;
 
-            return agent.send(data).then(res => {
+            return agent.send(authData).then(res => {
                 let response = res.body.response;
 
                 this.accessToken = 'Bearer ' + response.access_token;
@@ -99,7 +101,7 @@ class PixivTinyApi {
     // ---------- COMMOM API ----------
     // 用户-详情
     userDetail(userId) {
-        if (!userId && typeof userId !== 'string')
+        if (!userId || typeof userId !== 'string')
             return Promise.reject(new TypeError('wrong userId'));
         return request
             .get('https://app-api.pixiv.net/v1/user/detail')
@@ -108,7 +110,7 @@ class PixivTinyApi {
     };
     // 用户-插画列表
     userIllusts(userId, offset = 0) {
-        if (!userId && typeof userId !== 'string')
+        if (!userId || typeof userId !== 'string')
             return Promise.reject(new TypeError('wrong userId'));
         return request
             .get('https://app-api.pixiv.net/v1/user/illusts')
@@ -117,7 +119,7 @@ class PixivTinyApi {
     };
     // 用户-收藏
     userBookmarks(userId, select = 'illust') {
-        if (!userId && typeof userId !== 'string')
+        if (!userId || typeof userId !== 'string')
             return Promise.reject(new TypeError('wrong userId'));
         let url;
         switch (select) {
@@ -141,7 +143,7 @@ class PixivTinyApi {
 
     // 相关列表
     illustRelated(illustId) {
-        if (!illustId && typeof illustId !== 'string')
+        if (!illustId || typeof illustId !== 'string')
             return Promise.reject(new TypeError('wrong userId'));
 
         return request
@@ -151,7 +153,7 @@ class PixivTinyApi {
     };
     // 评论列表
     illustComment(illustId) {
-        if (!illustId && typeof illustId !== 'string')
+        if (!illustId || typeof illustId !== 'string')
             return Promise.reject(new TypeError('wrong userId'));
 
         return request
@@ -161,7 +163,7 @@ class PixivTinyApi {
     };
 
     illustBookmark(illustId, select, tag) {
-        if (!illustId && typeof illustId !== 'string')
+        if (!illustId || typeof illustId !== 'string')
             return Promise.reject(new TypeError('wrong userId'));
         let url, data;
         switch (select) {
@@ -195,7 +197,7 @@ class PixivTinyApi {
     };
     // 收藏长按(详情)
     illustBookmarkDetail(illustId) {
-        if (!illustId && typeof illustId !== 'string')
+        if (!illustId || typeof illustId !== 'string')
             return Promise.reject(new TypeError('wrong userId'));
 
         return request
@@ -268,47 +270,9 @@ class PixivTinyApi {
             .query(params)
             .then(res => res.body);
     };
-    // 推荐
+    // todo 推荐 
     illustRecommended() {};
-    // 高亮文章
+    // todo 高亮文章
     spotlightArticles() {};
 };
-
-
-// const app = new PixivTinyApi();
-// app
-//     .login()
-//     .then((res) => {
-//         console.log(app);
-//         console.log(res);
-//     })
-//     .catch(console.log);
-// app.userDetail('14469137').then(console.log).catch(console.log);
-// app.userBookmarks('14469137').then(console.log);
-// app.illustComment('63012264').then(console.log).catch(console.log);
-// app
-//     .login()
-//     .then((res) => {
-//         console.log(res);
-//         return app.illustBookmark('62544419', 'delete');
-//     })
-//     .then(console.log)
-//     .catch(console.log);
-// app
-//     .login()
-//     .then((res) => {
-//         console.log(res);
-//         return app.illustBookmarkDetail('63012264');
-//     })
-//     .then(console.log)
-//     .catch(console.log);
-// app
-//     .login()
-//     .then((res) => {
-//         console.log(res);
-//         return app.userBookmarkTagsIllust();
-//     })
-//     .then(console.log)
-//     .catch(console.log);
-// app.illustRanking('day').then(console.log);
-// app.novelRanking('day').then(console.log);
+module.exports = PixivTinyApi;
