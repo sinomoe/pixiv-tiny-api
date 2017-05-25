@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/sino2322/pixiv-tiny-api/issues"
   },
-  "homepage": "https://github.com/sino2322/pixiv-tiny-api#readme"
+  "homepage": "https://github.com/sino2322/pixiv-tiny-api#readme",
+  "dependencies": {
+    "superagent": "3.5.2"
+  }
 }
