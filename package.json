@@ -1,27 +1,27 @@
 {
-  "name": "pixiv-tiny-api",
-  "version": "0.0.1",
-  "description": "a simple way to access pixiv api, apis here are all based on pixiv ios app's apis.",
-  "main": "index.js",
-  "scripts": {
-    "test": "mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sino2322/pixiv-tiny-api.git"
-  },
-  "keywords": [
-    "pixiv",
-    "api",
-    "ios"
-  ],
-  "author": "sino",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/sino2322/pixiv-tiny-api/issues"
-  },
-  "homepage": "https://github.com/sino2322/pixiv-tiny-api#readme",
-  "dependencies": {
-    "superagent": "3.5.2"
-  }
+    "name": "pixiv-tiny-api",
+    "version": "0.0.2",
+    "description": "a simple way to access pixiv api, apis here are all based on pixiv ios app's apis.",
+    "main": "index.js",
+    "scripts": {
+        "test": "mocha"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sino2322/pixiv-tiny-api.git"
+    },
+    "keywords": [
+        "pixiv",
+        "api",
+        "ios"
+    ],
+    "author": "sino",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/sino2322/pixiv-tiny-api/issues"
+    },
+    "homepage": "https://github.com/sino2322/pixiv-tiny-api#readme",
+    "dependencies": {
+        "superagent": "3.5.2"
+    }
 }
