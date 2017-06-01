@@ -89,12 +89,11 @@ class PixivTinyApi {
     };
 
     // 访问下一个分页并返回参数
-    nextPage(json) {
-        let next = this.nextUrl(json);
-        if (!next || typeof next !== 'string')
+    nextPage(url) {
+        if (!url || typeof url !== 'string')
             return Promise.reject(new TypeError('wrong nextUrl'));
         return request
-            .get(next)
+            .get(url)
             .then(res => res.body);
     }
 
@@ -218,6 +217,7 @@ class PixivTinyApi {
 
     // ---------- HOME TAB ----------
     // illust 排行
+    // NOTICE!!! R18相关的接口已经没数据了
     illustRanking(mode = 'day', date) {
         if (!mode || typeof mode !== 'string')
             return Promise.reject(new TypeError('wrong mode'));
