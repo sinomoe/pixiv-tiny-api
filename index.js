@@ -134,6 +134,7 @@ class PixivTinyApi {
 
         return request
             .get(url)
+            // restrict 为 private 时为私有
             .query({ user_id: userId, restrict: 'public', filter: filter })
             .then(res => res.body);
     };
@@ -270,9 +271,93 @@ class PixivTinyApi {
             .query(params)
             .then(res => res.body);
     };
-    // todo 推荐 
-    illustRecommended() {};
-    // todo 高亮文章
-    spotlightArticles() {};
+    // 推荐 
+    // 未登陆的话可填写 bookmarkIllustIds，根据其推荐
+    illustRecommended(bookmarkIllustIds = []) {
+        let params = { content_type: 'illust', filter: filter, include_ranking_label: 'true' };
+        if (!this.accessToken || typeof this.accessToken !== 'string') {
+            bookmarkIllustIds = bookmarkIllustIds.join(',');
+            return request
+                .get('https://app-api.pixiv.net/v1/illust/recommended-nologin')
+                .query(params)
+                .query({ bookmark_illust_ids: bookmarkIllustIds })
+                .then(res => res.body);
+        } else {
+            return request
+                .get('https://app-api.pixiv.net/v1/illust/recommended')
+                .query(params)
+                .set(headers)
+                .set({ Authorization: this.accessToken })
+                .then(res => res.body);
+        }
+    };
+    // 热点文章
+    spotlightArticles() {
+        return request
+            .get('https://app-api.pixiv.net/v1/spotlight/articles')
+            .query({ category: 'all' })
+            .then(res => res.body)
+    };
+
+    // ---------- MY TAB ----------
+    // 书签
+    novelMarkers() {
+        return request
+            .get('https://app-api.pixiv.net/v1/novel/markers')
+            .set({ Authorization: this.accessToken })
+            .then(res => res.body)
+    };
+    // following
+    userFollowing(userId) {
+        return request
+            .get('https://app-api.pixiv.net/v1/user/following')
+            .query({ user_id: userId, restrict: 'public' })
+            .then(res => res.body)
+    };
+    // follower
+    userFollower(userId) {
+        return request
+            .get('https://app-api.pixiv.net/v1/user/follower')
+            .query({ user_id: userId, filter: filter })
+            .then(res => res.body)
+    };
+    // 好 p 友
+    userMypixiv(userId) {
+        return request
+            .get('https://app-api.pixiv.net/v1/user/mypixiv')
+            .query({ user_id: userId })
+            .then(res => res.body)
+    };
+    // 黑名单用户
+    userList(userIds) {
+        return request
+            .get('https://app-api.pixiv.net/v2/user/list')
+            .query({ user_ids: userIds, filter: filter })
+            .set({ Authorization: this.accessToken })
+            .then(res => res.body)
+    };
+    // Add Following
+    userFollowAdd(userId) {
+        let data = { user_id: userId, restrict: 'public' };
+        return request
+            .post('https://app-api.pixiv.net/v1/user/follow/add')
+            .set(headers)
+            .set(postHeader)
+            .set({ Authorization: this.accessToken })
+            .send(data)
+            .then(res => res.body);
+    };
+    // Del Following
+    userFollowDelete(userId) {
+        let data = { user_id: userId, restrict: 'public' };
+        return request
+            .post('https://app-api.pixiv.net/v1/user/follow/delete')
+            .set(headers)
+            .set(postHeader)
+            .set({ Authorization: this.accessToken })
+            .send(data)
+            .then(res => res.body);
+    };
+
 };
 module.exports = PixivTinyApi;
