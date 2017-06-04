@@ -34,9 +34,10 @@ class PixivTinyApi {
     // 通过用名密码登陆，或通过 refreshToken 刷新令牌
     auth(username, password, refreshToken) {
         const authData = {
-            'get_secure_url': 1,
-            'client_id': 'bYGKuGVw91e0NMfPGp44euvGt59s',
-            'client_secret': 'HP3RmkgAmEGro0gn1x9ioawQE8WMfvLXDz3ZqxpK'
+            get_secure_url: 'ture',
+            client_id: 'KzEZED7aC0vird8jWyHM38mXjNTY',
+            client_secret: 'W9JZoJe00qPvJsiyCGT3CCtC6ZUtdpKpzMbNlUGP',
+            device_token: '1fd302c1db725fa8d3d421bda8da82d8'
         };
         let agent = request
             .post('https://oauth.secure.pixiv.net/auth/token')
@@ -45,7 +46,6 @@ class PixivTinyApi {
 
         if (refreshToken && !username && !password) {
             // 更新 token
-            // notice!!! 这个 api 貌似有点问题，暂时请求不通
             if (typeof refreshToken !== 'string')
                 Promise.reject(new TypeError('wrong refreshToken'));
 
@@ -57,6 +57,7 @@ class PixivTinyApi {
                 .then(res => {
                     this.accessToken = res.body.response.access_token;
                     this.refreshToken = res.body.response.refresh_token;
+                    return res.body;
                 });
         } else if (!refreshToken && username && password) {
             // 登陆
@@ -68,12 +69,9 @@ class PixivTinyApi {
             authData.password = password;
 
             return agent.send(authData).then(res => {
-                let response = res.body.response;
-
-                this.accessToken = 'Bearer ' + response.access_token;
-                this.refreshToken = response.refresh_token;
-
-                return response;
+                this.accessToken = 'Bearer ' + res.body.response.access_token;
+                this.refreshToken = res.body.response.refresh_token;
+                return res.body;
             });
         } else {
             return Promise.reject(new Error('illegal input'));
@@ -433,6 +431,30 @@ class PixivTinyApi {
             .get('https://app-api.pixiv.net/v1/search/autocomplete')
             .query({ word: word, filter: filter })
             .then(res => res.body)
+    };
+    // 屏蔽列表
+    muteList() {
+        return request
+            .get('https://app-api.pixiv.net/v1/mute/list')
+            .query({ filter: filter })
+            .set({ Authorization: this.accessToken })
+            .then(res => res.body)
+    };
+    // 添加或取消屏蔽
+    muteEdit(userId, method = 'add') {
+        let data;
+        if (method === 'add') {
+            data = { 'add_user_ids[]': userId };
+        } else if (method === 'delete') {
+            data = { 'delete_user_ids[]': userId };
+        }
+        return request
+            .post('https://app-api.pixiv.net/v1/mute/edit')
+            .set(headers)
+            .set(postHeader)
+            .set({ Authorization: this.accessToken })
+            .send(data)
+            .then(res => res.body);
     }
 
 };

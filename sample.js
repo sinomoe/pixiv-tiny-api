@@ -6,6 +6,7 @@ const app = new PixivTinyApi(username, password);
 // app.login()
 //     .then((res) => {
 //         console.log(res);
+//         app.refresh().then(console.log).catch(console.log);
 //         app.illustBookmark('62544419', 'delete')
 //             .then(console.log)
 //             .catch(console.log);
