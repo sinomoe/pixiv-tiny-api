@@ -359,5 +359,81 @@ class PixivTinyApi {
             .then(res => res.body);
     };
 
+    // ---------- NEW TAB ----------
+    // 关注用户的新作
+    illustFollow() {
+        return request
+            .get('https://app-api.pixiv.net/v2/illust/follow')
+            .query({ restrict: 'public', filter: filter })
+            .set({ Authorization: this.accessToken })
+            .then(res => res.body)
+    };
+    // 大家的新作(画作或漫画)
+    illustNew(type) {
+        return request
+            .get('https://app-api.pixiv.net/v1/illust/new')
+            .query({ content_type: type, filter: filter })
+            .then(res => res.body)
+    };
+    // 大家的新作(小说)
+    novelNew() {
+        return request
+            .get('https://app-api.pixiv.net/v1/novel/new')
+            .query({ filter: filter })
+            .then(res => res.body)
+    };
+    // 我的新作（画作）
+    illustMypixiv() {
+        return request
+            .get('https://app-api.pixiv.net/v2/illust/mypixiv')
+            .query({ filter: filter })
+            .set({ Authorization: this.accessToken })
+            .then(res => res.body)
+    };
+    // 我的新作（画作）
+    novelMypixiv() {
+        return request
+            .get('https://app-api.pixiv.net/v2/illust/mypixiv')
+            .query({ filter: filter })
+            .set({ Authorization: this.accessToken })
+            .then(res => res.body)
+    };
+    // 推荐作家
+    userRecommended() {
+        return request
+            .get('https://app-api.pixiv.net/v1/user/recommended')
+            .query({ filter: filter })
+            .then(res => res.body)
+    };
+
+    // ---------- SEARCH TAB ----------
+    // 标签趋势
+    trendingTagsIllust() {
+        return request
+            .get('https://app-api.pixiv.net/v1/trending-tags/illust')
+            .query({ filter: filter })
+            .then(res => res.body)
+    };
+    // 搜索
+    searchIllust(word) {
+        return request
+            .get('https://app-api.pixiv.net/v1/search/illust')
+            // search_target: partial_match_for_tags 部分一致
+            //                exact_match_for_tags 完全一致
+            // sort: date_desc 按更新顺序
+            //       date_asc 从旧到新
+            // duration: within_last_day 最近1天
+            //           within_last_week 最近一周
+            //           within_last_month 最近1个月
+            .query({ search_target: 'partial_match_for_tags', sort: 'date_desc', word: word, filter: filter })
+            .then(res => res.body)
+    };
+    searchAutocomplete(word) {
+        return request
+            .get('https://app-api.pixiv.net/v1/search/autocomplete')
+            .query({ word: word, filter: filter })
+            .then(res => res.body)
+    }
+
 };
 module.exports = PixivTinyApi;
