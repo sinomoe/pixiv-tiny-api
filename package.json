@@ -1,6 +1,6 @@
 {
     "name": "pixiv-tiny-api",
-    "version": "0.0.5",
+    "version": "0.1.0",
     "description": "a simple way to access pixiv api, apis here are all based on pixiv ios app's apis.",
     "main": "index.js",
     "scripts": {
