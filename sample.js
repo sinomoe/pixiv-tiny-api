@@ -1,13 +1,26 @@
 const PixivTinyApi = require('./index');
 // define your username and password
 const { username, password } = require('./config');
-const util = require('util');
 const app = new PixivTinyApi({ username, password });
 
-const timeOut = util.promisify(setTimeout);
+async function loginSample() {
+    try {
+        await app.login().then(console.log);
+        await app.userBookmarkTagsIllust().then(console.log);
 
-async function tt() {
-    await app.login().then(console.log);
-    await app.userBookmarkTagsIllust().then(console.log);
+    } catch (e) {
+        console.log(e);
+    }
 };
-tt();
+// loginSample();
+
+async function noLoginSample() {
+    try {
+        await app.searchIllust('少女').then(console.log);
+        await app.getNext().then(console.log);
+        await app.illustRanking().then(console.log);
+    } catch (e) {
+        console.log(e);
+    }
+}
+noLoginSample();

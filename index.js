@@ -101,9 +101,7 @@ module.exports = class {
     };
 
     // using username and password to login
-    login({ username, password } = {}) {
-        username = username || this.username;
-        password = password || this.password;
+    login(username = this.username, password = this.password) {
         delete this.username;
         delete this.password;
 
@@ -114,13 +112,24 @@ module.exports = class {
     }
 
     // using refreshToken refrsh token
-    refresh({ refreshToken } = {}) {
-        refreshToken = refreshToken || this.refreshToken;
-
+    refresh(refreshToken = this.refreshToken) {
         return this.auth({
             refreshToken: refreshToken
         });
     };
+
+    // logout
+    logout() {
+        return new Promise((resolve, reject) => {
+            try {
+                delete this.accessToken;
+                this.isLogin = false;
+            } catch (e) {
+                return reject(new Error('logout failed ' + e));
+            }
+            return resolve();
+        });
+    }
 
     // set nextUrl
     setNextUrl(json) {
@@ -142,10 +151,7 @@ module.exports = class {
 
     // user illusts
     // type: illust, manga
-    userIllusts(userId, { type, offset } = {}) {
-        type = type || 'illust';
-        offset = offset || '0';
-
+    userIllusts(userId, type = 'illust', offset = '0') {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/user/illusts',
             query: {
@@ -156,9 +162,7 @@ module.exports = class {
         });
     };
 
-    userBookmarksIllust(userId, { restrict } = {}) {
-        restrict = restrict || 'public';
-
+    userBookmarksIllust(userId, restrict) {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/user/bookmarks/illust',
             query: {
@@ -167,9 +171,7 @@ module.exports = class {
             }
         });
     };
-    userBookmarksNovel(userId, { restrict } = {}) {
-        restrict = restrict || 'public';
-
+    userBookmarksNovel(userId, restrict) {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/user/bookmarks/novel',
             query: {
@@ -180,14 +182,11 @@ module.exports = class {
     };
     // user's bookmarks
     // type: illust, novel
-    userBookmarks(userId, { restrict, type } = {}) {
-        restrict = restrict || 'public';
-        type = type || 'illust';
-
+    userBookmarks(userId, type = 'illust', restrict = 'public') {
         if (type === 'illust') {
-            return this.userBookmarksIllust(params);
+            return this.userBookmarksIllust(userId, restrict);
         } else if (type === 'novel') {
-            return this.userBookmarksNovel(params);
+            return this.userBookmarksNovel(userId, restrict);
         } else {
             return Promise.reject(new Error('wrong param "type" input'));
         }
@@ -209,12 +208,7 @@ module.exports = class {
         });
     };
 
-    illustBookmarkAdd(illustId, { restrict } = {}) {
-        if (!this.isLogin)
-            return Promise.reject(new Error('you must login first'));
-
-        restrict = restrict || 'public';
-
+    illustBookmarkAdd(illustId, restrict) {
         return this._post({
             url: 'https://app-api.pixiv.net/v2/illust/bookmark/add',
             body: {
@@ -224,9 +218,6 @@ module.exports = class {
         });
     };
     illustBookmarkDelete(illustId) {
-        if (!this.isLogin)
-            return Promise.reject(new Error('you must login first'));
-
         return this._post({
             url: 'https://app-api.pixiv.net/v1/illust/bookmark/delete',
             body: {
@@ -235,9 +226,6 @@ module.exports = class {
         });
     };
     illustBookmarkDetail(illustId) {
-        if (!this.isLogin)
-            return Promise.reject(new Error('you must login first'));
-
         return this._get({
             url: 'https://app-api.pixiv.net/v2/illust/bookmark/detail',
             query: { illust_id: illustId }
@@ -247,26 +235,25 @@ module.exports = class {
     // method: add     like(add into bookmarks)
     //         delete  cancel like(delete a bookmark)
     //         datail  bookmark's detail
-    illustBookmark(illustId, method, { restrict } = {}) {
-        restrict = restrict || 'public';
+    illustBookmark(illustId, method = 'add', restrict = 'public') {
+        if (!this.isLogin)
+            return Promise.reject(new Error('you must login first'));
 
         if (method === 'add') {
-            return this.illustBookmarkAdd(params)
+            return this.illustBookmarkAdd(illustId, restrict)
         } else if (method === 'delete') {
-            return this.illustBookmarkDelete(params);
+            return this.illustBookmarkDelete(illustId);
         } else if (method === 'detail') {
-            return this.illustBookmarkDetail(params);
+            return this.illustBookmarkDetail(illustId);
         } else {
             return Promise.reject(new Error('wrong method input'));
         }
     };
 
     // illust bookmarks' tags
-    userBookmarkTagsIllust({ restrict } = {}) {
+    userBookmarkTagsIllust(restrict = 'public') {
         if (!this.isLogin)
             return Promise.reject(new Error('you must login first'));
-
-        restrict = restrict || 'public';
 
         return this._get({
             url: 'https://app-api.pixiv.net/v1/user/bookmark-tags/illust',
@@ -282,12 +269,7 @@ module.exports = class {
     //       day_manga, week_rookie_manga, week_manga
     //       month_manga
     // date: 0000-00-00
-    illustRanking({ mode, date } = {}) {
-        if (!this.isLogin)
-            return Promise.reject(new Error('you must login first'));
-
-        mode = mode || 'day';
-
+    illustRanking(mode = 'day', date) {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/illust/ranking',
             query: { mode: mode, date: date }
@@ -297,19 +279,18 @@ module.exports = class {
     // novel ranking
     // mode: day, day_male, day_female, week_rookie, week
     // date: 0000-00-00
-    novelRanking({ mode, date } = {}) {
-        mode = mode || 'day';
-
+    novelRanking(mode = 'day', date) {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/novel/ranking',
             query: { mode: mode, date: date }
         });
     };
 
-    illustRecommendedNoLogin({ bookmarkIllustIds, contentType, includeRankingLabel }) {
-        contentType = contentType || 'illust';
-        includeRankingLabel = includeRankingLabel || 'true';
-        bookmarkIllustIds = bookmarkIllustIds.join(',') || '';
+    illustRecommendedNoLogin(bookmarkIllustIds, contentType, includeRankingLabel) {
+        if (!Array.isArray(bookmarkIllustIds))
+            return Promise.reject(new TypeError('param "bookmarkIllustIds" should be an array'));
+
+        bookmarkIllustIds = bookmarkIllustIds.join(',');
 
         return this._get({
             url: 'https://app-api.pixiv.net/v1/illust/recommended-nologin',
@@ -320,12 +301,9 @@ module.exports = class {
             }
         });
     };
-    illustRecommendedLogin({ contentType, includeRankingLabel }) {
+    illustRecommendedLogin(contentType, includeRankingLabel) {
         if (!this.isLogin)
             return Promise.reject(new Error('you must login first'));
-
-        contentType = contentType || 'illust';
-        includeRankingLabel = includeRankingLabel || 'true';
 
         return this._get({
             url: 'https://app-api.pixiv.net/v1/illust/recommended',
@@ -335,19 +313,18 @@ module.exports = class {
             }
         });
     };
+    // todo : reload this method
     // illusts' recmendation
     // if it was not login, bookmarkIllustIds can be used to recommend by
-    illustRecommended({ bookmarkIllustIds, contentType, includeRankingLabel } = {}) {
+    illustRecommended(bookmarkIllustIds = [], contentType = 'illust', includeRankingLabel = 'true') {
         if (this.isLogin)
-            return this.illustRecommendedLogin({ contentType, includeRankingLabel });
+            return this.illustRecommendedLogin(contentType, includeRankingLabel);
 
-        return this.illustRecommendedNoLogin({ bookmarkIllustIds, contentType, includeRankingLabel });
+        return this.illustRecommendedNoLogin(bookmarkIllustIds, contentType, includeRankingLabel);
     };
 
     // pixivision
-    spotlightArticles({ category } = {}) {
-        category = category || 'all';
-
+    spotlightArticles(category = 'all') {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/spotlight/articles',
             query: { category: category }
@@ -365,9 +342,7 @@ module.exports = class {
     };
 
     // following
-    userFollowing(userId, { restrict } = {}) {
-        restrict = restrict || 'public';
-
+    userFollowing(userId, restrict = 'public') {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/user/following',
             query: { user_id: userId, restrict: restrict }
@@ -401,23 +376,13 @@ module.exports = class {
         });
     };
 
-    userFollowAdd(userId, { restrict } = {}) {
-        if (!this.isLogin)
-            return Promise.reject(new Error('you must login first'));
-
-        restrict = restrict || 'public';
-
+    userFollowAdd(userId, restrict) {
         return this._post({
             url: 'https://app-api.pixiv.net/v1/user/follow/add',
             body: { user_id: userId, restrict: restrict }
         });
     };
-    userFollowDelete(userId, { restrict } = {}) {
-        if (!this.isLogin)
-            return Promise.reject(new Error('you must login first'));
-
-        restrict = restrict || 'public';
-
+    userFollowDelete(userId, restrict) {
         return this._post({
             url: 'https://app-api.pixiv.net/v1/user/follow/delete',
             body: { user_id: userId, restrict: restrict }
@@ -426,25 +391,23 @@ module.exports = class {
     // manage follow
     // method : add     add following users
     //          delete  delete following users
-    userFollow(userId, method, { restrict } = {}) {
-        restrict = restrict || 'public';
-        method = method || 'add';
+    userFollow(userId, method = 'add', restrict = 'public') {
+        if (!this.isLogin)
+            return Promise.reject(new Error('you must login first'));
 
         if (method === 'add') {
-            return this.userFollowAdd(params);
+            return this.userFollowAdd(userId, restrict);
         } else if (method === 'delete') {
-            return this.userFollowDelete(params);
+            return this.userFollowDelete(userId, restrict);
         } else {
             return Promise.reject(new Error('wrong method input'));
         }
     }
 
     // users' new illusts who are followed by me
-    illustFollow({ restrict } = {}) {
+    illustFollow(restrict = 'public') {
         if (!this.isLogin)
             return Promise.reject(new Error('you must login first'));
-
-        restrict = restrict || 'public';
 
         return this._get({
             url: 'https://app-api.pixiv.net/v2/illust/follow',
@@ -454,9 +417,7 @@ module.exports = class {
 
     // new illusts or mangas
     // contentType: illust, manga
-    illustNew({ contentType } = {}) {
-        contentType = contentType || 'illust';
-
+    illustNew(contentType = 'illust') {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/illust/new',
             query: { content_type: contentType }
@@ -512,16 +473,14 @@ module.exports = class {
     // duration: within_last_day
     //           within_last_week
     //           within_last_month
-    searchIllust(word, { searchTarget, sort } = {}) {
-        searchTarget = searchTarget || 'partial_match_for_tags';
-        sort = sort || 'date_desc';
-
+    searchIllust(word, { searchTarget = 'partial_match_for_tags', duration = 'within_last_day', sort = 'date_desc' } = {}) {
         return this._get({
             url: 'https://app-api.pixiv.net/v1/search/illust',
             query: {
                 search_target: searchTarget,
                 word: word,
-                sort: sort
+                sort: sort,
+                duration: duration
             }
         });
     };
@@ -547,7 +506,7 @@ module.exports = class {
 
     // manage mutelist
     // method: add, delete
-    muteEdit(userId, method) {
+    muteEdit(userId, method = 'add') {
         if (!this.isLogin)
             return Promise.reject(new Error('you must login first'));
 
