@@ -96,7 +96,7 @@ module.exports = class {
             this.refreshToken = body.response.refresh_token;
             this.isLogin = true;
 
-            return body;
+            return body.response;
         });
     };
 
